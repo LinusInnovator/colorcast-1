@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Globe, Thermometer, ExternalLink, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Globe, Thermometer, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { WeatherData, ColorTheme, WeatherCondition } from '../types';
 import { WeatherIcon } from './WeatherIcon';
 import { getOppositeDestination } from '../utils/recommendations';
+import { TemperatureSlider } from './TemperatureSlider';
+import { getRandomEscapeMessage, getRandomTemptationMessage } from '../utils/messages';
 
 interface Props {
   weather: WeatherData;
@@ -13,9 +15,12 @@ interface Props {
 
 export const WeatherDisplay: React.FC<Props> = ({ weather, colorTheme, message }) => {
   const [isCelsius, setIsCelsius] = useState(true);
+  const [showEscapePlan, setShowEscapePlan] = useState(false);
+  const [escapeMessage] = useState(getRandomEscapeMessage());
+  const [temptationMessage] = useState(getRandomTemptationMessage());
+  
   const temperature = isCelsius ? weather.temperature : (weather.temperature * 9/5) + 32;
   const tomorrowTemp = isCelsius ? weather.tomorrow.temperature : (weather.tomorrow.temperature * 9/5) + 32;
-  const oppositeDestination = getOppositeDestination(weather.temperature, weather.location);
 
   return (
     <motion.div
@@ -55,7 +60,7 @@ export const WeatherDisplay: React.FC<Props> = ({ weather, colorTheme, message }
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="space-y-2"
+        className="space-y-5"
       >
         <div className="flex items-start gap-4">
           <h1 
@@ -85,56 +90,88 @@ export const WeatherDisplay: React.FC<Props> = ({ weather, colorTheme, message }
           {message}
         </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="pt-8 mt-8 opacity-60"
-          style={{ 
-            color: colorTheme.subtext,
-            borderTop: `1px solid ${colorTheme.subtext}`,
-            borderTopColor: `rgba(${colorTheme.subtext.includes('255') ? '255, 255, 255' : '0, 0, 0'}, 0.1)`
-          }}
-        >
-          <a
-            href={oppositeDestination.affiliateUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center justify-between text-sm hover:opacity-100 transition-opacity"
-          >
-            <span className="opacity-70">
-              Rather be in {oppositeDestination.city}? It's {oppositeDestination.temperature}°C there.
-              <br />
-              <span className="text-xs opacity-60">{oppositeDestination.description}</span>
-            </span>
-            <ExternalLink size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
-          </a>
-        </motion.div>
-      </motion.div>
+        <div className="flex flex-col">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setIsCelsius(!isCelsius)}
+              className="flex items-center gap-2 text-sm transition-opacity hover:opacity-100"
+              style={{ color: colorTheme.subtext }}
+            >
+              <Thermometer size={16} />
+              <span>{isCelsius ? '°C' : '°F'}</span>
+            </button>
+            <div 
+              className="flex items-center gap-2"
+              style={{ color: colorTheme.subtext }}
+            >
+              <WeatherIcon 
+                condition={weather.tomorrow.condition as WeatherCondition}
+                color={colorTheme.subtext}
+                size={16}
+              />
+              <span className="text-sm">
+                {weather.tomorrow.date}: {Math.round(tomorrowTemp)}°
+              </span>
+            </div>
+          </div>
 
-      <div className="flex justify-between items-center mt-12">
-        <button
-          onClick={() => setIsCelsius(!isCelsius)}
-          className="flex items-center gap-2 text-sm transition-opacity hover:opacity-100"
-          style={{ color: colorTheme.subtext }}
-        >
-          <Thermometer size={16} />
-          <span>{isCelsius ? '°C' : '°F'}</span>
-        </button>
-        <div 
-          className="flex items-center gap-2"
-          style={{ color: colorTheme.subtext }}
-        >
-          <WeatherIcon 
-            condition={weather.tomorrow.condition as WeatherCondition}
-            color={colorTheme.subtext}
-            size={16}
-          />
-          <span className="text-sm">
-            {weather.tomorrow.date}: {Math.round(tomorrowTemp)}°
-          </span>
+          <div className="flex flex-col items-center mt-5">
+            <motion.button
+              onClick={() => setShowEscapePlan(!showEscapePlan)}
+              className="group flex items-center gap-2 text-sm opacity-60 hover:opacity-100 transition-opacity"
+              style={{ color: colorTheme.text }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span>{showEscapePlan ? temptationMessage : escapeMessage}</span>
+            </motion.button>
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{ 
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              {showEscapePlan ? (
+                <ChevronUp 
+                  size={16} 
+                  className="opacity-40"
+                  style={{ color: colorTheme.text }} 
+                />
+              ) : (
+                <ChevronDown 
+                  size={16} 
+                  className="opacity-40"
+                  style={{ color: colorTheme.text }} 
+                />
+              )}
+            </motion.div>
+          </div>
+
+          {showEscapePlan && (
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mt-5"
+              >
+                <div 
+                  className="pt-5"
+                  style={{ 
+                    borderTop: `1px solid ${colorTheme.subtext}`,
+                    borderTopColor: `rgba(${colorTheme.subtext.includes('255') ? '255, 255, 255' : '0, 0, 0'}, 0.1)`
+                  }}
+                >
+                  <TemperatureSlider currentTemp={weather.temperature} colorTheme={colorTheme} />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
-}
+};
