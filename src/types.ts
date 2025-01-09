@@ -4,6 +4,12 @@ export interface WeatherData {
   humidity: number;
   windSpeed: number;
   location: string;
+  currentDate: string;
+  tomorrow: {
+    temperature: number;
+    condition: string;
+    date: string;
+  };
 }
 
 export interface ColorTheme {

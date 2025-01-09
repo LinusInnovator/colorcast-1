@@ -53,7 +53,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -61,7 +61,7 @@ function App() {
 
   if (error || !weather) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center">
         <ErrorDisplay error={error || 'Unknown error'} onRetry={loadWeather} />
       </div>
     );
@@ -72,10 +72,10 @@ function App() {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4 transition-colors duration-500"
-      style={{ backgroundColor: colorTheme.background }}
+      className="min-h-screen transition-colors duration-500"
+      style={{ background: colorTheme.background }}
     >
-      <div className="w-full max-w-4xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <WeatherDisplay
           weather={weather}
           colorTheme={colorTheme}

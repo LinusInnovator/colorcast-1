@@ -1,71 +1,71 @@
 import { ColorTheme } from '../types';
 
 export const getColorTheme = (temperature: number): ColorTheme => {
+  // Base colors for different temperature ranges
+  let baseColor: string;
+  let textColor: string;
+  
   // Extreme hot (120°F+)
-  if (temperature >= 48.9) { // 120°F
-    return {
-      background: '#4A0000', // Dark maroon
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  if (temperature >= 48.9) {
+    baseColor = '#4A0000'; // Dark maroon
+    textColor = '#FFFFFF';
   }
   // Very hot (95-120°F)
-  else if (temperature >= 35) { // 95°F
-    return {
-      background: '#8B3D48', // Dark red
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  else if (temperature >= 35) {
+    baseColor = '#8B3D48'; // Dark red
+    textColor = '#FFFFFF';
   }
   // Warm (80-95°F)
-  else if (temperature >= 26.7) { // 80°F
-    return {
-      background: '#C19D61', // Warm tan
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  else if (temperature >= 26.7) {
+    baseColor = '#C19D61'; // Warm tan
+    textColor = '#FFFFFF';
   }
   // Mild warm (70-80°F)
-  else if (temperature >= 21.1) { // 70°F
-    return {
-      background: '#B5B396', // Sage green
-      text: '#000000',
-      subtext: 'rgba(0, 0, 0, 0.7)'
-    };
+  else if (temperature >= 21.1) {
+    baseColor = '#B5B396'; // Sage green
+    textColor = '#000000';
   }
   // Cool (55-70°F)
-  else if (temperature >= 12.8) { // 55°F
-    return {
-      background: '#6B8E9B', // Cool blue-gray
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  else if (temperature >= 12.8) {
+    baseColor = '#6B8E9B'; // Cool blue-gray
+    textColor = '#FFFFFF';
   }
   // Cold (40-55°F)
-  else if (temperature >= 4.4) { // 40°F
-    return {
-      background: '#2B4C7C', // Medium blue
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  else if (temperature >= 4.4) {
+    baseColor = '#2B4C7C'; // Medium blue
+    textColor = '#FFFFFF';
   }
   // Very cold (25-40°F)
-  else if (temperature >= -3.9) { // 25°F
-    return {
-      background: '#1E3557', // Dark blue
-      text: '#FFFFFF',
-      subtext: 'rgba(255, 255, 255, 0.7)'
-    };
+  else if (temperature >= -3.9) {
+    baseColor = '#1E3557'; // Dark blue
+    textColor = '#FFFFFF';
   }
   // Extreme cold (below 25°F)
   else {
-    return {
-      background: '#C9D7E5', // Light blue-gray
-      text: '#000000',
-      subtext: 'rgba(0, 0, 0, 0.7)'
-    };
+    baseColor = '#C9D7E5'; // Light blue-gray
+    textColor = '#000000';
   }
+
+  // Create gradient by lightening/darkening the base color
+  const lighterColor = adjustColor(baseColor, 15); // 15% lighter
+  const darkerColor = adjustColor(baseColor, -15); // 15% darker
+
+  return {
+    background: `linear-gradient(135deg, ${lighterColor} 0%, ${baseColor} 50%, ${darkerColor} 100%)`,
+    text: textColor,
+    subtext: textColor === '#FFFFFF' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+  };
 };
+
+// Helper function to adjust color brightness
+function adjustColor(color: string, percent: number): string {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.max(Math.min((num >> 16) + amt, 255), 0);
+  const G = Math.max(Math.min(((num >> 8) & 0x00FF) + amt, 255), 0);
+  const B = Math.max(Math.min((num & 0x0000FF) + amt, 255), 0);
+  return '#' + (0x1000000 + (R << 16) + (G << 8) + B).toString(16).slice(1);
+}
 
 export const getWeatherMessage = (temperature: number, condition: string): string => {
   // Base messages for different conditions
